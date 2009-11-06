@@ -3,7 +3,7 @@ from distutils.core import setup
 import py2exe
 
 setup(
-    console = [
+    windows = [
         {
             "script": "logcatviewer.py",
             "icon_resources": [(1, "magic.ico")]  
