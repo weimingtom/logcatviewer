@@ -82,7 +82,7 @@ class Window(QtGui.QMainWindow):
             if(type(item[i]) != type(u'fdsa')):
                     item_str[i] = "%s"%(item[i])
 #                    item[i] = str(item[i])
-        insert_str = '\n[' + item_str[1] + ' '+ item_str[2] + item_str[3] +'/' +  item_str[4] + ']\n' + item_str[5]
+        insert_str = '[' + item_str[1] + ' '+ item_str[2] + item_str[3] +'/' +  item_str[4] + ']\n' + item_str[5]
           
         self.sourceWidget.append(insert_str)
  
@@ -163,7 +163,10 @@ class Window(QtGui.QMainWindow):
     def open(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self,"LogCat Viewer Open File",self.savefile)
         if not fileName.isEmpty():
+            globalvar.logcatlogging.debug("Open file %s"%(fileName))
             self.setWindowTitle("LogCat Viewer: %s"%(fileName))
+            fileName=unicode(fileName)
+
             self.db.setlogfile(fileName)
             self.setSourceModel('')
             self.seetings.setValue('SaveFile', QtCore.QVariant(fileName))
