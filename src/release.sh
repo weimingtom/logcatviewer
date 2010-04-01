@@ -17,6 +17,8 @@ if [ -e build ]
 then
     rm -rf build
 fi
+export VENDOR="Borqs"
+export PRODUCT="LogcatViewer"
 export VERSION=$1
 
 python setup.py py2exe
@@ -26,10 +28,12 @@ cd NSIS
 makensis logcatviewer.nsi
 cd ..
 
-if [ -e dist ]
-then
-    rm -rf dist
-fi
+#if [ -e dist ]
+#then
+
+#    rm -rf dist
+
+#fi
 
 if [ -e build ]
 then

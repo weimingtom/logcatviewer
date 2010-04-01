@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
+
 import sys
 from PyQt4 import QtCore, QtGui
 import Logdatabase
 import ConfigParser
 import functools
-
+import logging
+import globalvar
+import traceback
 class Window(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QWidget.__init__(self)
@@ -19,9 +23,14 @@ class Window(QtGui.QMainWindow):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         self.custorstr='where detail LIKE \'%AT[%\''
-        self.sourceWidget = QtGui.QTreeWidget()
-        self.sourceWidget.setRootIsDecorated(False)
-        self.sourceWidget.setAlternatingRowColors(True)
+        
+        font = QtGui.QFont()
+        font.setFamily('Courier')
+        font.setFixedPitch(True)
+        font.setPointSize(12)
+
+        self.sourceWidget = QtGui.QTextEdit()
+        self.sourceWidget.setFont(font)        
   
         self.setCentralWidget(self.sourceWidget)
        
@@ -37,10 +46,11 @@ class Window(QtGui.QMainWindow):
         self.db = Logdatabase.LogModels()
         
     def InitSourceWidget(self):
-        labels = QtCore.QStringList()
+        pass
+#        labels = QtCore.QStringList()
 #logtime,info,,type,component,detail        
-        labels << self.tr("logtime") << self.tr("type") << self.tr("component")<<self.tr("detail")
-        self.sourceWidget.setHeaderLabels(labels)
+#        labels << self.tr("logtime") << self.tr("type") << self.tr("component")<<self.tr("detail")
+#        self.sourceWidget.setHeaderLabels(labels)
         #self.sourceWidget.autoRefresh = True
         #self.setSourceModel()
         #self.sourceWidget.setModel(self.model)
@@ -52,34 +62,29 @@ class Window(QtGui.QMainWindow):
         #rows = self.model.rowCount()
         #self.model.removeRows(0,rows)
         pattern_str = 'SELECT * from logtable  ' + str
-        print 'your execute is %s'%(pattern_str)
+        globalvar.logcatlogging.debug('your sql is %s'%(pattern_str))        
         self.alllog = self.db.execute(pattern_str)
-        print '---------------count = %d'%(len(self.alllog))
         self.rec_index=0
         self.alllog.reverse()
         for item in self.alllog:
-            #print 'item is',item
             self.addItem(item)
             self.rec_index = self.rec_index + 1
         self.statusBar().showMessage(self.tr("Filter: %s . Total %d rows"%(pattern_str,self.rec_index)))     
         #self.sourceWidget.setModel(self.model)
         #ft = self.font()
-        #print 'font size %d'%(ft.pointSize())
     def addItem(self,item):
-#        print 'add item'
-#        print item
-        #print 'the index is %d'%(self.rec_index)
-
-        str_lst = QtCore.QStringList()      
-        str_item5 = str(repr(item[5]))
-        str_item5 = str_item5[2:-1]
-        str_lst << str(item[1]) << str(item[3]) << str(item[4]) << str_item5
-   
 
 
-        treeitem = QtGui.QTreeWidgetItem(str_lst) 
-        self.sourceWidget.insertTopLevelItem(0,treeitem)
+        item_str=[0,1,2,4,5,6,7,9]
         
+        for i in range(1,6):
+            item_str[i] = item[i]
+            if(type(item[i]) != type(u'fdsa')):
+                    item_str[i] = "%s"%(item[i])
+#                    item[i] = str(item[i])
+        insert_str = '\n[' + item_str[1] + ' '+ item_str[2] + item_str[3] +'/' +  item_str[4] + ']\n' + item_str[5]
+          
+        self.sourceWidget.append(insert_str)
  
          
     def createActions(self):
@@ -196,7 +201,7 @@ class Window(QtGui.QMainWindow):
                                 self.findfilterstr)
         
         condition = str(text)
-        print "condition %s"%(condition)
+        globalvar.logcatlogging.debug("your condition %s"%(condition)) 
         if ok and not text.isEmpty():
             self.findfilterstr = condition
             condition = 'where detail LIKE \'%%%s%%\''%(condition)
@@ -209,7 +214,7 @@ class Window(QtGui.QMainWindow):
                                 self.customfilterstr)
         
         condition = str(text)
-        print "condition %s"%(condition)
+        globalvar.logcatlogging.debug("your condition %s"%(condition))
         if ok and not text.isEmpty():
             self.setSourceModel(condition)
             self.customfilterstr = condition
@@ -240,13 +245,31 @@ class Window(QtGui.QMainWindow):
 
         self.statusBar().showMessage(self.tr("File saved"), 2000)
         return True               
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(name)-12s  %(levelname)-8s %(message)s',
+                    filename="logcatviewer.log",
+                    datefmt="%m-%d %H:%M:%S",        
+                    filemode='a')
+console=logging.StreamHandler()
+console.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
+
+globalvar.logcatlogging = logging.getLogger('Viewer')
                            
 app = QtGui.QApplication(sys.argv)
 window = Window()
 window.InitSourceWidget()
     #window.setSourceModel()
-window.show()
-sys.exit(app.exec_())
+try:    
+    window.show()
+    sys.exit(app.exec_())
+except:
+    exption_str=traceback.format_exc()
+    globalvar.logcatlogging.error( "Unexpected error:\n %s ",exption_str )
+    sys.exit(0)        
                 
         
         

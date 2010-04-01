@@ -4,9 +4,6 @@
 ;--------------------------------
 
 SetOverwrite on
-
-
-
 ;--------------------------------
 
 !macro MoveFileToDetails file
@@ -46,17 +43,17 @@ SetOverwrite on
 ;--------------------------------
 
 ; The name of the installer
-Name "Borqs LogcatViewer"
+Name "$%VENDOR% $%PRODUCT%"
 
 ; The file to write
-OutFile "..\LogcatViewer-$%VERSION%-setup.exe"
+OutFile "..\$%VENDOR%_$%PRODUCT%_$%VERSION%-setup.exe"
 
 ; The default installation directory
-InstallDir $PROGRAMFILES\borqs\LogcatViewer
+InstallDir $PROGRAMFILES\$%VENDOR%\$%PRODUCT%
 
 ; Registry key to check for directory (so if you install again, it will
 ; overwrite the old one automatically)
-InstallDirRegKey HKLM "Software\borqs\LogcatViewer" "Install_Dir"
+InstallDirRegKey HKLM "Software\$%VENDOR%\$%PRODUCT%" "Install_Dir"
 
 ;Vista redirects $SMPROGRAMS to all users without this
 RequestExecutionLevel admin
@@ -73,8 +70,8 @@ ShowUninstDetails show
   !define MUI_FINISHPAGE_SHOWREADME ChangeLog.txt
   !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
 
-  !define MUI_FINISHPAGE_LINK "Visit borqs homepage"
-  !define MUI_FINISHPAGE_LINK_LOCATION http://borqs.com/
+  !define MUI_FINISHPAGE_LINK "Visit $%VENDOR% homepage"
+  !define MUI_FINISHPAGE_LINK_LOCATION http://www.$%VENDOR%.com/
 
   !define MUI_FINISHPAGE_NOAUTOCLOSE
 
@@ -100,7 +97,7 @@ ShowUninstDetails show
 
 ;--------------------------------
 
-Section "LogcatViewer" sec_LogcatViewer
+Section "$%VENDOR%" sec_$%VENDOR%
 
   SectionIn RO
 
@@ -109,20 +106,20 @@ Section "LogcatViewer" sec_LogcatViewer
 
   ; Put files there
   File /r "..\dist\*.*"
-  
-	;File "..\*.ini"
-  
+  File /r "..\filter.ini" 
+  File /r "..\ChangeLog.txt"
+
   ; Write the installation path into the registry
-  WriteRegStr HKLM SOFTWARE\borqs\LogcatViewer "Install_Dir" "$INSTDIR"
+  WriteRegStr HKLM SOFTWARE\$%VENDOR%\$%PRODUCT% "Install_Dir" "$INSTDIR"
 
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LogcatViewer" "DisplayName" "Borqs LogcatViewer"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LogcatViewer" "HelpLink" "http://borqs.com"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LogcatViewer" "URLUpdateInfo" "http://borqs.com"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$%PRODUCT%" "DisplayName" "$%VENDOR% $%PRODUCT%"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$%PRODUCT%" "HelpLink" "http://www.$%VENDOR%.com"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$%PRODUCT%" "URLUpdateInfo" "http://www.$%VENDOR%.com"
 
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LogcatViewer" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LogcatViewer" "NoModify" 1
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LogcatViewer" "NoRepair" 1
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$%PRODUCT%" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$%PRODUCT%" "NoModify" 1
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$%PRODUCT%" "NoRepair" 1
 
   WriteUninstaller "uninstall.exe"
 
@@ -133,12 +130,12 @@ SectionEnd
 Section "Start Menu Shortcuts" sec_shortcuts
   SetOutPath $INSTDIR
 
-  CreateDirectory "$SMPROGRAMS\Borqs\LogcatViewer"
-  CreateShortCut "$SMPROGRAMS\Borqs\LogcatViewer\LogcatViewer.lnk" "$INSTDIR\LogcatViewer.exe"
-  CreateShortCut "$SMPROGRAMS\Borqs\LogcatViewer\ChangeLog.lnk" "$INSTDIR\ChangeLog.txt"
-  CreateShortCut "$SMPROGRAMS\Borqs\LogcatViewer\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
-  CreateShortCut "$QUICKLAUNCH\LogcatViewer V.$%VERSION%.lnk" "$INSTDIR\LogcatViewer.exe"
-  CreateShortCut "$DESKTOP\LogcatViewer V.$%VERSION%.lnk" "$INSTDIR\LogcatViewer.exe"
+  CreateDirectory "$SMPROGRAMS\$%VENDOR%\$%PRODUCT%"
+  CreateShortCut "$SMPROGRAMS\$%VENDOR%\$%PRODUCT%\$%PRODUCT%.V.$%VERSION%.lnk" "$INSTDIR\$%PRODUCT%.exe"
+  CreateShortCut "$SMPROGRAMS\$%VENDOR%\$%PRODUCT%\ChangeLog.lnk" "$INSTDIR\ChangeLog.txt"
+  CreateShortCut "$SMPROGRAMS\$%VENDOR%\$%PRODUCT%\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+  CreateShortCut "$QUICKLAUNCH\$%PRODUCT%V.$%VERSION%.lnk" "$INSTDIR\$%PRODUCT%.exe"
+  CreateShortCut "$DESKTOP\$%PRODUCT%V.$%VERSION%.lnk" "$INSTDIR\$%PRODUCT%.exe"
 
 SectionEnd
 
@@ -154,8 +151,8 @@ Section "Uninstall"
 
 
   ; Remove registry keys
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LogcatViewer"
-  DeleteRegKey HKLM SOFTWARE\borqs\LogcatViewer
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$%PRODUCT%"
+  DeleteRegKey HKLM SOFTWARE\$%VENDOR%\$%PRODUCT%
   
   ; Remove files and uninstaller
 
@@ -163,12 +160,12 @@ Section "Uninstall"
 
 
   ; Remove shortcuts, if any
-  Delete "$SMPROGRAMS\borqs\LogcatViewer\*.*"
-  Delete "$DESKTOP\LogcatViewer V.$%VERSION%.lnk"
-  Delete "$QUICKLAUNCH\LogcatViewer V.$%VERSION%.lnk"
+  Delete "$SMPROGRAMS\$%VENDOR%\$%PRODUCT%\*.*"
+  Delete "$DESKTOP\$%PRODUCT%V.$%VERSION%.lnk"
+  Delete "$QUICKLAUNCH\$%PRODUCT%V.$%VERSION%.lnk"
 
   ; Remove directories used
-  RMDir "$SMPROGRAMS\borqs\LogcatViewer"
+  RMDir "$SMPROGRAMS\$%VENDOR%\$%PRODUCT%"
 
   RMDir /r "$INSTDIR"
 
@@ -177,12 +174,12 @@ SectionEnd
 ;--------------------------------
 
   ;Language strings
-  LangString DESC_sec_LogcatViewer ${LANG_ENGLISH} "Install Borqs LogcatViewer files."
+  LangString DESC_sec_$%VENDOR% ${LANG_ENGLISH} "Install $%VENDOR% $%PRODUCT% files."
   LangString DESC_sec_shortcuts ${LANG_ENGLISH} "Add shortcuts to the Start Menu."
 
   ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-    !insertmacro MUI_DESCRIPTION_TEXT ${sec_LogcatViewer} $(DESC_sec_LogcatViewer)
+    !insertmacro MUI_DESCRIPTION_TEXT ${sec_$%VENDOR%} $(DESC_sec_$%VENDOR%)
     !insertmacro MUI_DESCRIPTION_TEXT ${sec_shortcuts} $(DESC_sec_shortcuts)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
@@ -191,11 +188,11 @@ SectionEnd
 Function .onInit
 var /GLOBAL unPath
 
-StrCpy $unPath "c:\Program Files\borqs\LogcatViewer\uninstall.exe" 
+StrCpy $unPath "c:\Program Files\$%VENDOR%\$%PRODUCT%\uninstall.exe" 
 
-IfFileExists "c:\Program Files\borqs\LogcatViewer\uninstall.exe" uninstall
+IfFileExists "c:\Program Files\$%VENDOR%\$%PRODUCT%\uninstall.exe" uninstall
 
-ReadRegStr $unPath HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LogcatViewer" "UninstallString"
+ReadRegStr $unPath HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$%VENDOR%" "UninstallString"
 IfErrors 0 uninstall
 goto End
 
@@ -203,7 +200,7 @@ quit:
     Quit
 uninstall:
     MessageBox MB_YESNO|MB_ICONQUESTION \
-               "Borqs LogcatViewer already installed at$\n$\n    $unPath, $\n$\nClick Yes to uninstall it, No to quit installation." \
+               "$%VENDOR% $%PRODUCT% already installed at$\n$\n    $unPath, $\n$\nClick Yes to uninstall it, No to quit installation." \
                IDYES doUninstall \
                IDNO quit
 doUninstall:

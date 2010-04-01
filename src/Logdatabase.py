@@ -1,6 +1,7 @@
 import sqlite3
 import re
-
+import pprint
+import globalvar
 class LogModels(object):
     def __init__(self):
         self.conn = sqlite3.connect(':memory:') 
@@ -14,12 +15,12 @@ class LogModels(object):
         self.conn.commit()
         
     def execute(self,str):
-        print 'execute %s'%(str)
+        
+        globalvar.logcatlogging.debug('execute %s'%(str))
         self.cursor.execute(str)
         result = [];
         for row in self.cursor:
-            result.append(row)
-            #print row
+            result.insert(0,row)
         return result
     
     def setlogfile(self,filename):
@@ -28,10 +29,10 @@ class LogModels(object):
         self.conn.commit()
         readline_cnt = 0
         test_parse_cnt = 0
-        print 'set log file'
+
         f = open(filename)
-        time_pattern =  re.compile(r"\[{0,1}\s{0,}(\d{2}\-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d{2,})\s{0,}(.{0,})\s{0,}([WVDIE])/(\w{1,})\s{0,}\]{0,1}\n{0,1}")        
-        whole_pattern = re.compile(r"\[{0,1}\s{0,}(\d{2}\-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d{2,})\s{0,}(.{0,})\s{0,}([WVDIE])/(\w{1,})\s{0,}\]{0,1}\n{0,1}(.*)")
+        time_pattern =  re.compile(r"\[{0,1}\s{0,}(\d{2}\-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d{2,})\s{0,}(.{0,})\s{0,}([WVDIE]|WARN|VERBOSE|DEBUG|INFO|ERROR)/(\w{1,})\s{0,}\]{0,1}\n{0,1}")        
+        whole_pattern = re.compile(r"\[{0,1}\s{0,}(\d{2}\-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d{2,})\s{0,}(.*?)\s{0,}([WVDIE]|WARN|VERBOSE|DEBUG|INFO|ERROR)/(\w{1,})\s{0,}\]{0,1}\n{0,1}(.*)",re.DOTALL)
         
         cache = buf = f.readline()      
 
@@ -45,7 +46,6 @@ class LogModels(object):
                 while not parse_result:
                     cache = cache  + buf
                     buf = f.readline()
-                    
                     if not buf:
                         break
                     parse_result = time_pattern.findall(buf)
@@ -54,14 +54,18 @@ class LogModels(object):
                 parse_result = whole_pattern.findall(cache)
                 if( parse_result):
                     for item in parse_result:
-                      log = (None,item[0],item[1],item[2],item[3],item[4])
+                      try:  
+                          try:
+                              detail = item[4].decode('UTF-8')
+                          except:
+                              detail = item[4].decode('GBK')
+                      except:
+                          detail = "the detail can't be display"          
+                      log = (None,item[0],item[1],item[2],item[3],detail)
                       self.cursor.execute('insert into logtable values (?,?,?,?,?,?)', log)    
                       test_parse_cnt = test_parse_cnt + 1
                 cache = buf
             else:
                 cache = buf = f.readline()
-
-        print 'the count is %d'%(test_parse_cnt )
-        
         self.conn.commit()
         f.close()
