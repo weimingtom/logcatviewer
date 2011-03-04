@@ -1,3 +1,4 @@
+#!/bin/env pystart
 import sys
 import re
 import pprint
@@ -18,7 +19,7 @@ def main():
     time_pattern =   re.compile(r"(\[\s{0,}\d{2}\-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d{2,}\s{0,}\d{1,}:0x[0-9a-fA-F]{0,}\s{0,}[WVDIE]/)(\w{1,})(\s{0,}\]\s{0,})",re.DOTALL|re.MULTILINE)    
     
     buf = f.readline()
-    cache = buf    
+    cache = None    
     start = 0
     
     while buf:
